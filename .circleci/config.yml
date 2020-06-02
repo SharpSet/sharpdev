@@ -80,6 +80,7 @@ workflows:
       - compile
 
       - dockerhub:
+          context: General
           requires:
             - compile
           filters:
@@ -87,6 +88,7 @@ workflows:
               only: master
 
       - release:
+          context: General
           requires:
             - compile
           filters:
