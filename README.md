@@ -11,7 +11,7 @@ Installation
 ===========
 On linux, just run:
 ```console
-adam@console~$ sudo curl -s -L https://github.com/Sharpz7/sharpdev/releases/download/0.0.1a/install.sh | bash
+adam@console~$ sudo curl -s -L https://github.com/Sharpz7/sharpdev/releases/download/0.1.1/install.sh | sudo bash
 ```
 
 Maintainers and Developers

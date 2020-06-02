@@ -80,15 +80,17 @@ workflows:
       - compile
 
       - dockerhub:
+          context: General
           requires:
             - compile
           filters:
             branches:
-              only: master
+              only: citesting
 
       - release:
+          context: General
           requires:
             - compile
           filters:
             branches:
-              only: master
+              only: citesting

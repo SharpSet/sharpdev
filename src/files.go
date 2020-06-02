@@ -8,6 +8,8 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+
+// Creates default sharpdev.yml file
 func genFile() {
 	scriptsEx := make(map[string]string)
 	scriptsEx["example"] = "echo 'Hello World!'"
@@ -23,6 +25,7 @@ func genFile() {
 	fmt.Println("Created sharpdev.yml")
 }
 
+// Loads a sharpdev file
 func loadFile() (config, error) {
 	f, readErr := ioutil.ReadFile("./sharpdev.yml")
 	var devFile config
@@ -34,6 +37,7 @@ func loadFile() (config, error) {
 	return devFile, nil
 }
 
+// Saves a sharpdev file
 func saveFile(devFile config) error {
 	yamlData, marshErr := yaml.Marshal(devFile)
 	clientErrCheck(marshErr, "Failed to Convert to Yaml")

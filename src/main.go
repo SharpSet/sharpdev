@@ -14,6 +14,7 @@ import (
 )
 
 func main() {
+	// Parse Command Args
 	flag.Parse()
 
 	var name string
@@ -26,13 +27,14 @@ func main() {
 		return
 	}
 
+	// If no script is called load helpfunction
 	if len(flag.Args()) == 0 {
 		helpFunction(devFile)
 		return
 	}
 
+	// Run script with name of first arg
 	name = flag.Args()[0]
-
 	err = runScript(name, devFile)
 	if err != nil {
 		fmt.Println(err)
@@ -41,6 +43,7 @@ func main() {
 	return
 }
 
+// Deals with client Errors
 func clientErrCheck(e error, msg string) {
 	err := godotenv.Load()
 	if err != nil {
@@ -63,49 +66,81 @@ It Supports:
 	- env vars in the form $VAR or ${VAR}
 	- Multiline commands with |
 	- Inputting Args with env vars like $SHARP_ARG_{1, 2, 3, 4, etc}
+	- Multiple commands can be run by using &&
 
 Here are all the scripts you have available:
 	`)
 
+	// Shows all script names
 	for name := range devFile.Scripts {
 		fmt.Print(name+" || ")
 	}
 	fmt.Println("")
 }
 
+// Run a named script
 func runScript(name string, devFile config) error {
+
+	// Create Env Vars from other args
+	genSharpArgs()
+	var commandStr string
+	var ok bool
+
+	// Check if a envfile is required
 	if devFile.EnvFile != "" {
 		err := godotenv.Load()
 		clientErrCheck(err, "Failed to load env file")
 	}
 
-	var commandStr string
-	var ok bool
+	// Check that the arg is actually a script
 	if commandStr, ok = devFile.Scripts[name]; !ok {
 		err := errors.New("key not in scripts config")
 		clientErrCheck(err, "ScriptName "+name+" not known")
 	}
 
-	// Substitue Env Vars
-	if len(flag.Args()) > 1 {
-		for i := range flag.Args()[1:] {
-			sharpArg := fmt.Sprintf("SHARP_ARG_%d", i+1)
-			os.Setenv(sharpArg, flag.Args()[i+1])
+	// For each command in a script split by &&
+	commandStrings := strings.Split(commandStr, "&&")
+	for _, commStr := range commandStrings {
+
+		// Run command
+		err := runCommand(commStr)
+		if err != nil {
+			return err
 		}
 	}
 
-	commandStr, err := envsubst.String(commandStr)
+	return nil
+}
+
+func runCommand(commStr string) error {
+	// Substiute Env Vars
+	commStr, err := envsubst.String(commStr)
 	clientErrCheck(err, "Failed to add ENV vars")
-	arrCommandStr := strings.Fields(commandStr)
+	arrCommandStr := strings.Fields(commStr)
 
 	comm := arrCommandStr[0]
 	args := arrCommandStr[1:]
 
+	// Run command through OS args
 	cmd := exec.Command(comm, args...)
 	cmd.Env = os.Environ()
+	cmd.Stdin = os.Stdin
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
 	err = cmd.Run()
 
 	return err
+}
+
+func genSharpArgs() {
+
+	// If there is more than one arg
+	if len(flag.Args()) > 1 {
+		for i := range flag.Args()[1:] {
+
+			// Add arg to Environ
+			sharpArg := fmt.Sprintf("SHARP_ARG_%d", i+1)
+			os.Setenv(sharpArg, flag.Args()[i+1])
+		}
+	}
 }
