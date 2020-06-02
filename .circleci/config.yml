@@ -1,0 +1,94 @@
+version: 2
+
+variables:
+  DOCKER_DRIVER: overlay2
+
+jobs:
+  compile:
+    docker:
+      - image: sharp6292/gopack:0.1.0
+
+    steps:
+      - checkout
+
+      - run:
+          name: setup
+          command: |
+            mkdir releases
+            gopack --file install
+
+      - run:
+          name: compile
+          command: |
+            go build -o "sharpdev" ./src
+            tar -czf ./releases/linux.tar.gz "sharpdev"
+            cp -r ./src/installs/install.sh ./releases/install.sh
+
+            mkdir ./workspace
+            cp ./sharpdev ./workspace/sharpdev
+            cp ./.version ./workspace/.version
+            cp -r ./releases ./workspace/releases
+          environment:
+            GOOS: "linux"
+
+      - persist_to_workspace:
+          root: .
+          paths:
+            - ./workspace
+
+  dockerhub:
+    docker:
+      - image: docker:stable
+
+    steps:
+      - setup_remote_docker
+
+      - checkout
+
+      - attach_workspace:
+          at: .
+
+      - run:
+          name: build
+          command : |
+            source ./.version
+            docker login -u $DOCKER_USER -p $DOCKER_PASS
+            docker pull sharp6292/sharpdev:${VERSION} || true
+            docker build --cache-from sharp6292/sharpdev:${VERSION} -f ./.circleci/Dockerfile -t sharp6292/sharpdev:${VERSION} .
+            docker push  sharp6292/sharpdev:${VERSION}
+
+  release:
+    docker:
+      - image: sharp6292/ci-gitrelease
+
+    steps:
+      - attach_workspace:
+          at: .
+
+      - run:
+          name: release
+          command : |
+            cd ./workspace
+            source ./.version
+            sed -i -e "s/XXXXX/${VERSION}/g" ./releases/install.sh
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} ./releases
+
+workflows:
+  version: 2
+  workflow:
+    jobs:
+      - compile
+
+      - dockerhub:
+          requires:
+            - compile
+          filters:
+            branches:
+              only: master
+
+      - release:
+          requires:
+            - compile
+          filters:
+            branches:
+              only: master
