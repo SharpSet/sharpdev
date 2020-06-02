@@ -85,7 +85,7 @@ workflows:
             - compile
           filters:
             branches:
-              only: master
+              only: citesting
 
       - release:
           context: General
@@ -93,4 +93,4 @@ workflows:
             - compile
           filters:
             branches:
-              only: master
+              only: citesting
