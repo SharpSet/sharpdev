@@ -63,6 +63,7 @@ It Supports:
 	- env vars in the form $VAR or ${VAR}
 	- Multiline commands with |
 	- Inputting Args with env vars like $SHARP_ARG_{1, 2, 3, 4, etc}
+	- Multiple commands can be run by using &&
 
 Here are all the scripts you have available:
 	`)
@@ -74,29 +75,36 @@ Here are all the scripts you have available:
 }
 
 func runScript(name string, devFile config) error {
+
+	genSharpArgs()
+	var commandStr string
+	var ok bool
+
 	if devFile.EnvFile != "" {
 		err := godotenv.Load()
 		clientErrCheck(err, "Failed to load env file")
 	}
 
-	var commandStr string
-	var ok bool
 	if commandStr, ok = devFile.Scripts[name]; !ok {
 		err := errors.New("key not in scripts config")
 		clientErrCheck(err, "ScriptName "+name+" not known")
 	}
 
-	// Substitue Env Vars
-	if len(flag.Args()) > 1 {
-		for i := range flag.Args()[1:] {
-			sharpArg := fmt.Sprintf("SHARP_ARG_%d", i+1)
-			os.Setenv(sharpArg, flag.Args()[i+1])
+	commandStrings := strings.Split(commandStr, "&&")
+	for _, commStr := range commandStrings {
+		err := runCommand(commStr)
+		if err != nil {
+			return err
 		}
 	}
 
-	commandStr, err := envsubst.String(commandStr)
+	return nil
+}
+
+func runCommand(commStr string) error {
+	commStr, err := envsubst.String(commStr)
 	clientErrCheck(err, "Failed to add ENV vars")
-	arrCommandStr := strings.Fields(commandStr)
+	arrCommandStr := strings.Fields(commStr)
 
 	comm := arrCommandStr[0]
 	args := arrCommandStr[1:]
@@ -108,4 +116,13 @@ func runScript(name string, devFile config) error {
 	err = cmd.Run()
 
 	return err
+}
+
+func genSharpArgs() {
+	if len(flag.Args()) > 1 {
+		for i := range flag.Args()[1:] {
+			sharpArg := fmt.Sprintf("SHARP_ARG_%d", i+1)
+			os.Setenv(sharpArg, flag.Args()[i+1])
+		}
+	}
 }
