@@ -8,7 +8,6 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-
 // Creates default sharpdev.yml file
 func genFile() {
 	scriptsEx := make(map[string]string)
@@ -20,7 +19,7 @@ func genFile() {
 		EnvFile: ".env"}
 
 	err := saveFile(testfile)
-	clientErrCheck(err, "Failed to generate sharpdev.yml")
+	check(err, "Failed to generate sharpdev.yml")
 
 	fmt.Println("Created sharpdev.yml")
 }
@@ -40,7 +39,7 @@ func loadFile() (config, error) {
 // Saves a sharpdev file
 func saveFile(devFile config) error {
 	yamlData, marshErr := yaml.Marshal(devFile)
-	clientErrCheck(marshErr, "Failed to Convert to Yaml")
+	check(marshErr, "Failed to Convert to Yaml")
 	writeErr := ioutil.WriteFile("./sharpdev.yml", yamlData, 0644)
 
 	if marshErr != nil || writeErr != nil {

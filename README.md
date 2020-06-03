@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/Sharpz7/sharpdev.svg?style=svg)](https://circleci.com/gh/Sharpz7/sharpdev)
+
 SharpDev | Development Tools for your projects
 ===========
 

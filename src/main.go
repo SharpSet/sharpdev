@@ -14,9 +14,6 @@ import (
 )
 
 func main() {
-	// Parse Command Args
-	flag.Parse()
-
 	var name string
 
 	// Load sharpdev file
@@ -27,12 +24,15 @@ func main() {
 		return
 	}
 
+	// Make Helper Function and Parse Flags
+	setHelperFunction(devFile)
+	flag.Parse()
+
 	// If no script is called load helpfunction
 	if len(flag.Args()) == 0 {
-		helpFunction(devFile)
+		flag.Usage()
 		return
 	}
-
 	// Run script with name of first arg
 	name = flag.Args()[0]
 	err = runScript(name, devFile)
@@ -44,7 +44,8 @@ func main() {
 }
 
 // Deals with client Errors
-func clientErrCheck(e error, msg string) {
+func check(e error, msg string) {
+	// Try and get SHARPDEV var
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Cannot read enviroment")
@@ -58,27 +59,27 @@ func clientErrCheck(e error, msg string) {
 	}
 }
 
-func helpFunction(devFile config) {
-	fmt.Println(`
+func setHelperFunction(devFile config) {
+	flag.Usage = func() {
+		fmt.Println(`
 This Application lets you run scripts set in your sharpdev.yml file.
 
 It Supports:
 	- env vars in the form $VAR or ${VAR}
 	- Multiline commands with |
 	- Inputting Args with env vars like $SHARP_ARG_{1, 2, 3, 4, etc}
-	- Multiple commands can be run by using &&
 
 Here are all the scripts you have available:
-	`)
+			`)
 
-	// Shows all script names
-	for name := range devFile.Scripts {
-		fmt.Print(name+" || ")
+		// Shows all script name
+		for name := range devFile.Scripts {
+			fmt.Print(name + " || ")
+		}
+		fmt.Println("")
 	}
-	fmt.Println("")
 }
 
-// Run a named script
 func runScript(name string, devFile config) error {
 
 	// Create Env Vars from other args
@@ -89,13 +90,13 @@ func runScript(name string, devFile config) error {
 	// Check if a envfile is required
 	if devFile.EnvFile != "" {
 		err := godotenv.Load()
-		clientErrCheck(err, "Failed to load env file")
+		check(err, "Failed to load env file")
 	}
 
 	// Check that the arg is actually a script
 	if commandStr, ok = devFile.Scripts[name]; !ok {
 		err := errors.New("key not in scripts config")
-		clientErrCheck(err, "ScriptName "+name+" not known")
+		check(err, "ScriptName "+name+" not known")
 	}
 
 	// For each command in a script split by &&
@@ -115,7 +116,7 @@ func runScript(name string, devFile config) error {
 func runCommand(commStr string) error {
 	// Substiute Env Vars
 	commStr, err := envsubst.String(commStr)
-	clientErrCheck(err, "Failed to add ENV vars")
+	check(err, "Failed to add ENV vars")
 	arrCommandStr := strings.Fields(commStr)
 
 	comm := arrCommandStr[0]
