@@ -104,7 +104,7 @@ func runScript(name string, devFile config) error {
 	for _, commStr := range commandStrings {
 
 		// Run command
-		err := runCommand(commStr)
+		err := runCommand(commStr, devFile)
 		if err != nil {
 			return err
 		}
@@ -113,11 +113,18 @@ func runScript(name string, devFile config) error {
 	return nil
 }
 
-func runCommand(commStr string) error {
+func runCommand(commStr string, devFile config) error {
 	// Substiute Env Vars
 	commStr, err := envsubst.String(commStr)
 	check(err, "Failed to add ENV vars")
 	arrCommandStr := strings.Fields(commStr)
+
+	// For command string replace any reference to args
+	for key, argVal := range devFile.Args {
+		for i, arg := range arrCommandStr {
+			arrCommandStr[i] = strings.ReplaceAll(arg, key, argVal)
+		}
+	}
 
 	comm := arrCommandStr[0]
 	args := arrCommandStr[1:]
