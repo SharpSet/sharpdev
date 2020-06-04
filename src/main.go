@@ -48,7 +48,7 @@ func check(e error, msg string) {
 	// Try and get SHARPDEV var
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("Cannot read enviroment")
+		fmt.Println("Cannot read enviroment")
 	}
 
 	if e != nil {
