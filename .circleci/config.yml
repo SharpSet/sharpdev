@@ -30,10 +30,9 @@ jobs:
             cp -r ./installs/install.sh ./releases/install.sh
 
             mkdir ./workspace
-            cp ./internal/sharpdev ./workspace/sharpdev
+            cp ./sharpdev ./workspace/sharpdev
             cp ./.version ./workspace/.version
             cp -r ./releases ./workspace/releases
-
 
       - persist_to_workspace:
           root: .
