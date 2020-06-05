@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  release: sharptools/release@0.0.2
+  release: sharptools/release@0.0.3
 
 jobs:
   compile:
@@ -44,7 +44,7 @@ workflows:
     jobs:
       - compile
 
-      - release/github:
+      - release/github_job:
           context: General
           requires:
             - compile
