@@ -4,5 +4,5 @@ type config struct {
 	Version float32           `yml:"version"`
 	EnvFile string            `yml:"envfile"`
 	Scripts map[string]string `yml:"scripts"`
-	Args    map[string]string `yml:"args"`
+	Values  map[string]string `yml:"values"`
 }

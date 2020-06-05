@@ -46,10 +46,7 @@ func main() {
 // Deals with client Errors
 func check(e error, msg string) {
 	// Try and get SHARPDEV var
-	err := godotenv.Load()
-	if err != nil {
-		fmt.Println("Cannot read enviroment")
-	}
+	godotenv.Load()
 
 	if e != nil {
 		if os.Getenv("SHARPDEV") == "TRUE" {
@@ -99,15 +96,10 @@ func runScript(name string, devFile config) error {
 		check(err, "ScriptName "+name+" not known")
 	}
 
-	// For each command in a script split by &&
-	commandStrings := strings.Split(commandStr, "&&")
-	for _, commStr := range commandStrings {
-
-		// Run command
-		err := runCommand(commStr, devFile)
-		if err != nil {
-			return err
-		}
+	// Run command
+	err := runCommand(commandStr, devFile)
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -117,20 +109,14 @@ func runCommand(commStr string, devFile config) error {
 	// Substiute Env Vars
 	commStr, err := envsubst.String(commStr)
 	check(err, "Failed to add ENV vars")
-	arrCommandStr := strings.Fields(commStr)
 
 	// For command string replace any reference to args
-	for key, argVal := range devFile.Args {
-		for i, arg := range arrCommandStr {
-			arrCommandStr[i] = strings.ReplaceAll(arg, key, argVal)
-		}
+	for key, val := range devFile.Values {
+		commStr = strings.ReplaceAll(commStr, key, val)
 	}
 
-	comm := arrCommandStr[0]
-	args := arrCommandStr[1:]
-
 	// Run command through OS args
-	cmd := exec.Command(comm, args...)
+	cmd := exec.Command("/bin/sh", "-c", commStr)
 	cmd.Env = os.Environ()
 	cmd.Stdin = os.Stdin
 	cmd.Stderr = os.Stderr

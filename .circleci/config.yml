@@ -6,56 +6,39 @@ variables:
 jobs:
   compile:
     docker:
-      - image: sharp6292/gopack:0.1.0
+      - image: cimg/go:1.12
 
     steps:
       - checkout
 
       - run:
-          name: setup
-          command: |
-            mkdir releases
-            gopack --file install
-
-      - run:
           name: compile
           command: |
-            go build -o "sharpdev" ./src
-            tar -czf ./releases/linux.tar.gz "sharpdev"
-            cp -r ./src/installs/install.sh ./releases/install.sh
+            mkdir releases
+            curl -s -L https://github.com/Sharpz7/gopack/releases/download/0.1.2/install.sh | bash
+            gopack --file install
 
-            mkdir ./workspace
-            cp ./sharpdev ./workspace/sharpdev
-            cp ./.version ./workspace/.version
-            cp -r ./releases ./workspace/releases
+            go build -o "sharpdev" ./src
+
           environment:
             GOOS: "linux"
+
+      - run:
+          name: tar
+          command: |
+            tar -czf ./releases/linux.tar.gz "sharpdev"
+            cp -r ./installs/install.sh ./releases/install.sh
+
+            mkdir ./workspace
+            cp ./internal/sharpdev ./workspace/sharpdev
+            cp ./.version ./workspace/.version
+            cp -r ./releases ./workspace/releases
+
 
       - persist_to_workspace:
           root: .
           paths:
             - ./workspace
-
-  dockerhub:
-    docker:
-      - image: docker:stable
-
-    steps:
-      - setup_remote_docker
-
-      - checkout
-
-      - attach_workspace:
-          at: .
-
-      - run:
-          name: build
-          command : |
-            source ./.version
-            docker login -u $DOCKER_USER -p $DOCKER_PASS
-            docker pull sharp6292/sharpdev:${VERSION} || true
-            docker build --cache-from sharp6292/sharpdev:${VERSION} -f ./.circleci/Dockerfile -t sharp6292/sharpdev:${VERSION} .
-            docker push  sharp6292/sharpdev:${VERSION}
 
   release:
     docker:
@@ -78,14 +61,6 @@ workflows:
   workflow:
     jobs:
       - compile
-
-      - dockerhub:
-          context: General
-          requires:
-            - compile
-          filters:
-            branches:
-              only: master
 
       - release:
           context: General

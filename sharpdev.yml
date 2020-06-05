@@ -1,8 +1,8 @@
 version: 0.1
 envfile: .env
-args:
-  test: Hello World!
-  
+values:
+  TEST: Hello World!
+
 scripts:
   build: go build -o sharpdev ./src
   revert: git revert ${SHARP_ARG_1}..HEAD
@@ -10,4 +10,6 @@ scripts:
   archive: |
    git tag archive/${SHARP_ARG_1} ${SHARP_ARG_1} &&
    git branch -d ${SHARP_ARG_1}
-  test: echo test
+  test: |
+    echo "test" &&
+    echo "Hello"
