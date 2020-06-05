@@ -1,7 +1,7 @@
-version: 2
+version: 2.1
 
-variables:
-  DOCKER_DRIVER: overlay2
+orbs:
+  orb-tools: sharptools/release@0.0.2
 
 jobs:
   compile:
@@ -39,29 +39,13 @@ jobs:
           paths:
             - ./workspace
 
-  release:
-    docker:
-      - image: sharp6292/ci-gitrelease
-
-    steps:
-      - attach_workspace:
-          at: .
-
-      - run:
-          name: release
-          command : |
-            cd ./workspace
-            source ./.version
-            sed -i -e "s/XXXXX/${VERSION}/g" ./releases/install.sh
-            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} ./releases
-
 workflows:
   version: 2
   workflow:
     jobs:
       - compile
 
-      - release:
+      - release/github:
           context: General
           requires:
             - compile
