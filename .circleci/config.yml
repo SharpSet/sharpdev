@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  orb-tools: sharptools/release@0.0.2
+  release: sharptools/release@0.0.2
 
 jobs:
   compile:
