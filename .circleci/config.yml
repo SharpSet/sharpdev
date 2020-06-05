@@ -40,7 +40,6 @@ jobs:
             - ./workspace
 
 workflows:
-  version: 2
   workflow:
     jobs:
       - compile
