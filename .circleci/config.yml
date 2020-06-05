@@ -14,7 +14,7 @@ workflows:
       - release/github_job:
           context: General
           requires:
-            - compile
+            - go/package
           filters:
             branches:
               only: master
