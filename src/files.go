@@ -14,7 +14,7 @@ func genFile() {
 	scriptsEx["example"] = "echo 'Hello World!'"
 
 	testfile := config{
-		Version: 0.1,
+		Version: 1.0,
 		Scripts: scriptsEx,
 		EnvFile: ".env"}
 

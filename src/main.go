@@ -29,7 +29,7 @@ func main() {
 	flag.Parse()
 
 	// If no script is called load helpfunction
-	if len(flag.Args()) == 0 {
+	if (len(flag.Args()) == 0) || (flag.Args()[0] == "help") {
 		flag.Usage()
 		return
 	}
@@ -49,7 +49,7 @@ func check(e error, msg string) {
 	godotenv.Load()
 
 	if e != nil {
-		if os.Getenv("SHARPDEV") == "TRUE" {
+		if os.Getenv("DEV") == "TRUE" {
 			fmt.Println(e)
 		}
 		log.Fatal(msg)
@@ -64,7 +64,7 @@ This Application lets you run scripts set in your sharpdev.yml file.
 It Supports:
 	- env vars in the form $VAR or ${VAR}
 	- Multiline commands with |
-	- Inputting Args with env vars like $SHARP_ARG_{1, 2, 3, 4, etc}
+	- Inputting Args with env vars like $@ARG{1, 2, 3, 4, etc}
 
 Here are all the scripts you have available:
 			`)
@@ -78,6 +78,10 @@ Here are all the scripts you have available:
 }
 
 func runScript(name string, devFile config) error {
+
+	// Check if version is correct
+	err := checkVersion(devFile)
+	check(err, "Incorrect version. \nCurrently running 1.0, Script is running "+fmt.Sprint(devFile.Version))
 
 	// Create Env Vars from other args
 	genSharpArgs()
@@ -97,7 +101,7 @@ func runScript(name string, devFile config) error {
 	}
 
 	// Run command
-	err := runCommand(commandStr, devFile)
+	err = runCommand(commandStr, devFile)
 	if err != nil {
 		return err
 	}
@@ -106,7 +110,7 @@ func runScript(name string, devFile config) error {
 }
 
 func runCommand(commStr string, devFile config) error {
-	// Substiute Env Vars
+	// Substitute Env Vars
 	commStr, err := envsubst.String(commStr)
 	check(err, "Failed to add ENV vars")
 
@@ -114,6 +118,9 @@ func runCommand(commStr string, devFile config) error {
 	for key, val := range devFile.Values {
 		commStr = strings.ReplaceAll(commStr, key, val)
 	}
+
+	// Replace "\n" with &&
+	strings.Replace(commStr, "\n", "&&", -1)
 
 	// Run command through OS args
 	cmd := exec.Command("/bin/sh", "-c", commStr)
@@ -133,8 +140,17 @@ func genSharpArgs() {
 		for i := range flag.Args()[1:] {
 
 			// Add arg to Environ
-			sharpArg := fmt.Sprintf("SHARP_ARG_%d", i+1)
+			sharpArg := fmt.Sprintf("_ARG%d", i+1)
 			os.Setenv(sharpArg, flag.Args()[i+1])
 		}
 	}
+}
+
+func checkVersion(devFile config) error {
+
+	if devFile.Version != 1.0 {
+		return errors.New("")
+	}
+
+	return nil
 }
