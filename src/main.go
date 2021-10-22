@@ -64,7 +64,7 @@ This Application lets you run scripts set in your sharpdev.yml file.
 It Supports:
 	- env vars in the form $VAR or ${VAR}
 	- Multiline commands with |
-	- Inputting Args with env vars like $@ARG{1, 2, 3, 4, etc}
+	- Inputting Args with env vars like $_ARG{1, 2, 3, 4, etc}
 
 Here are all the scripts you have available:
 			`)
