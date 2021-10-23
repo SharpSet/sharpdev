@@ -14,13 +14,13 @@ values:
 
 scripts:
   build: go build -o ./internal/sharpdev ./src
-  revert: git revert ${SHARP_ARG_1}..HEAD
+  revert: git revert $_ARG1..HEAD
   list: git branch
   archive: |
-   git tag archive/${SHARP_ARG_1} ${SHARP_ARG_1} &&
-   git branch -d ${SHARP_ARG_1}
-  test1: sharpdev build && ./internal/sharpdev ${SHARP_ARG_1}
-  test2: sharpdev build && ./internal/sharpdev ${SHARP_ARG_1} ${SHARP_ARG_2}
+   git tag archive/$_ARG1 $_ARG1 &&
+   git branch -d $_ARG1
+  test1: sharpdev build && ./internal/sharpdev $_ARG1
+  test2: sharpdev build && ./internal/sharpdev $_ARG1 $_ARG2
   new1: |
     echo "Hello World!"
     echo "Test 2"
@@ -63,3 +63,7 @@ revert || archive || new2 || new1 || full || build || list || test1 || test2 ||
 ## Maintainers
 
 - [Adam McArthur](https://adam.mcaq.me)
+
+## TODO
+
+- If file has incorrect syntax, it deletes the file
