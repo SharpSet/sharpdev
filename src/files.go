@@ -25,15 +25,22 @@ func genFile() {
 }
 
 // Loads a sharpdev file
-func loadFile() (config, error) {
+func loadFile() config {
 	f, readErr := ioutil.ReadFile("./sharpdev.yml")
+
+	if readErr != nil {
+		fmt.Println("No sharpdev.yml was found... generating new one")
+		genFile()
+		return config{}
+	}
 	var devFile config
 	marshErr := yaml.Unmarshal(f, &devFile)
-	if marshErr != nil || readErr != nil {
-		return config{}, errors.New("failed to load file")
+	if marshErr != nil {
+		fmt.Println("Syntax error in sharpdev.yml")
+		return config{}
 	}
 
-	return devFile, nil
+	return devFile
 }
 
 // Saves a sharpdev file

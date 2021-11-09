@@ -17,11 +17,9 @@ func main() {
 	var name string
 
 	// Load sharpdev file
-	devFile, err := loadFile()
-	if err != nil {
-		fmt.Println("No sharpdev.yml was found... generating new one")
-		genFile()
-		return
+	devFile := loadFile()
+	if devFile.Version == 0 {
+		os.Exit(1)
 	}
 
 	// Make Helper Function and Parse Flags
@@ -35,7 +33,7 @@ func main() {
 	}
 	// Run script with name of first arg
 	name = flag.Args()[0]
-	err = runScript(name, devFile)
+	err := runScript(name, devFile)
 	if err != nil {
 		fmt.Println(err)
 	}

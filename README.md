@@ -36,16 +36,14 @@ scripts:
 # Installation
 On linux, just run:
 ```console
-╭─adam@box ~/
-╰─➤  sudo curl -s -L https://github.com/Sharpz7/sharpdev/releases/download/0.2.0/install.sh | sudo bash
+sudo curl -s -L https://github.com/Sharpz7/sharpdev/releases/download/0.2.0/install.sh | sudo bash
 ```
 
 ## Command Options
 
 On linux, just run:
 ```console
-╭─adam@box ~/
-╰─➤  sharpdev --help
+sharpdev --help
 
 This Application lets you run scripts set in your sharpdev.yml file.
 
@@ -62,7 +60,3 @@ revert || archive || new2 || new1 || full || build || list || test1 || test2 ||
 ## Maintainers
 
 - [Adam McArthur](https://adam.mcaq.me)
-
-## TODO
-
-- If file has incorrect syntax, it deletes the file
