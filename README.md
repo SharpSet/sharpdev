@@ -36,7 +36,7 @@ scripts:
 # Installation
 On linux, just run:
 ```console
-sudo curl -s -L https://github.com/Sharpz7/sharpdev/releases/download/0.2.0/install.sh | sudo bash
+sudo curl -s -L https://github.com/Sharpz7/sharpdev/releases/download/1.0/install.sh | sudo bash
 ```
 
 ## Command Options
