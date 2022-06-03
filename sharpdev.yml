@@ -5,22 +5,19 @@ values:
 
 scripts:
   build: go build -o ./internal/sharpdev ./src
-  revert: git revert ${SHARP_ARG_1}..HEAD
-  list: git branch
-  archive: |
-   git tag archive/${SHARP_ARG_1} ${SHARP_ARG_1} &&
-   git branch -d ${SHARP_ARG_1}
-  test1: sharpdev build && ./internal/sharpdev ${SHARP_ARG_1}
-  test2: sharpdev build && ./internal/sharpdev ${SHARP_ARG_1} ${SHARP_ARG_2}
-  new1: |
-    echo "Hello World!"
-    echo "Test 2"
+  test1: sharpdev build && ./internal/sharpdev echo1
+  test2: sharpdev build && ./internal/sharpdev echo2 $_ARG1
+  test3: |
+    sharpdev build
+    cd ./internal
+    ./sharpdev -p echo1
 
-  new2: echo $_ARG1
+  echo1: echo TEST
+  echo2: echo $_ARG1
 
   full: |
-    sharpdev test1 help &&
-    sharpdev test2 new2 TEXT &&
-    sharpdev test1 new1
+    sharpdev test1
+    sharpdev test2 Test2
+    sharpdev test3
 
 

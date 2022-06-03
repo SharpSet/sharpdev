@@ -37,14 +37,16 @@ func loadFile(parent *bool) config {
 	// recursively search each parent directory for a sharpdev.yml file
 
 	var file string
+	var err error
+	var dir string = "./"
 
 	if *parent == true {
 		// find the parent directory
-		dir, err := os.Getwd()
+		dir, err = os.Getwd()
 		check(err, "Failed to get current directory")
 		dir = dir + "/.."
 
-		fmt.Println("Searching for sharpdev.yml in parent directory")
+		fmt.Println("\nSearching for sharpdev.yml in parent directory")
 
 		// loop through each directory until we find a sharpdev.yml file
 		for {
@@ -66,13 +68,13 @@ func loadFile(parent *bool) config {
 			// otherwise go up one directory
 			dir = dir + "/.."
 
-			fmt.Println(dir)
 		}
+
+		fmt.Println("Found sharpdev.yml in parent directory\n" + file)
+		fmt.Println()
 	} else {
 		file = "./sharpdev.yml"
 	}
-
-	fmt.Println(file)
 
 	f, readErr := ioutil.ReadFile(file)
 
@@ -87,6 +89,8 @@ func loadFile(parent *bool) config {
 		fmt.Println("Syntax error in sharpdev.yml")
 		return config{}
 	}
+
+	devFile.EnvFile = dir + "/" + devFile.EnvFile
 
 	return devFile
 }

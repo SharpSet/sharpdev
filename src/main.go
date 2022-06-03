@@ -95,7 +95,7 @@ func runScript(name string, devFile config) error {
 
 	// Check if a envfile is required
 	if devFile.EnvFile != "" {
-		err := godotenv.Load()
+		err := godotenv.Load(devFile.EnvFile)
 		check(err, "Failed to load env file")
 	}
 
