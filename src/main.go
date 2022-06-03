@@ -13,18 +13,22 @@ import (
 	"github.com/joho/godotenv"
 )
 
+// add a -p flag var as bool
+var parent = flag.Bool("p", false, "Use a parent sharpdev.yml file")
+
 func main() {
 	var name string
 
+	flag.Parse()
+
 	// Load sharpdev file
-	devFile := loadFile()
+	devFile := loadFile(parent)
 	if devFile.Version == 0 {
 		os.Exit(1)
 	}
 
 	// Make Helper Function and Parse Flags
 	setHelperFunction(devFile)
-	flag.Parse()
 
 	// If no script is called load helpfunction
 	if (len(flag.Args()) == 0) || (flag.Args()[0] == "help") {
@@ -63,6 +67,9 @@ It Supports:
 	- env vars in the form $VAR or ${VAR}
 	- Multiline commands with |
 	- Inputting Args with env vars like $_ARG{1, 2, 3, 4, etc}
+
+Flags:
+	-p  Uses a parent sharpdev.yml file
 
 Here are all the scripts you have available:
 			`)
