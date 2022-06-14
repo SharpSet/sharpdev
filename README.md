@@ -1,7 +1,7 @@
-[![CircleCI](https://circleci.com/gh/Sharpz7/sharpdev.svg?style=svg)](https://circleci.com/gh/Sharpz7/sharpdev)
+[![CircleCI](https://circleci.com/gh/SharpSet/sharpdev.svg?style=svg)](https://circleci.com/gh/SharpSet/sharpdev)
 
-
-# SharpDev | Development Tools for your projects
+![SharpDev](https://files.mcaq.me/039xk.png)
+# Development Tools for your projects
 
 Sharpdev aims to make scripts for your projects much easier to use!
 
@@ -33,7 +33,7 @@ scripts:
 # Installation
 On linux, just run:
 ```console
-sudo curl -s -L https://github.com/Sharpz7/sharpdev/releases/download/1.3/install.sh | sudo bash
+sudo curl -s -L https://github.com/SharpSet/sharpdev/releases/download/1.3/install.sh | sudo bash
 ```
 
 ## Command Options
