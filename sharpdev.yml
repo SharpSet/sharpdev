@@ -1,23 +1,34 @@
 version: 1.0
 envfile: .env
 values:
-  TEST: Hello World!
+  TEST: Values work
 
 scripts:
   build: go build -o ./internal/sharpdev ./src
   test1: sharpdev build && ./internal/sharpdev echo1
-  test2: sharpdev build && ./internal/sharpdev echo2 $_ARG1
+  test2: sharpdev build && ./internal/sharpdev echo2 $_ARG1 $_ARG2
+
   test3: |
     sharpdev build
     cd ./internal
-    ./sharpdev -p echo1
+    ./sharpdev -p echo3
+    cd ..
+
+  test4: |
+    sharpdev build
+    cd ./internal
+    ./sharpdev -v
+    ./sharpdev --version
+    cd ..
 
   echo1: echo TEST
-  echo2: echo $_ARG1
+  echo2: echo $_ARG1 $_ARG2
+  echo3: echo $ECHO
 
   full: |
     sharpdev test1
-    sharpdev test2 Test2
+    sharpdev test2 Args Works
     sharpdev test3
+    sharpdev test4
 
 

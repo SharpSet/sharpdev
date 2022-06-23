@@ -6,3 +6,6 @@ type config struct {
 	Scripts map[string]string `yml:"scripts"`
 	Values  map[string]string `yml:"values"`
 }
+
+// Version Number
+var Version float32 = 1.4

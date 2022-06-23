@@ -15,16 +15,30 @@ import (
 
 // add a -p flag var as bool
 var parent = flag.Bool("p", false, "Use a parent sharpdev.yml file")
+var version = flag.Bool("v", false, "Get the version number")
+var version2 = flag.Bool("version", false, "Get the version number")
 
 func main() {
 	var name string
 
 	flag.Parse()
 
+	// If -v is used, print version
+	if *version || *version2 {
+		fmt.Println(Version)
+		os.Exit(0)
+	}
+
 	// Load sharpdev file
 	devFile := loadFile(parent)
 	if devFile.Version == 0 {
 		os.Exit(1)
+	}
+
+	// Check if a envfile is required
+	if devFile.EnvFile != "" {
+		err := godotenv.Load(devFile.EnvFile)
+		check(err, "Failed to load env file2")
 	}
 
 	// Make Helper Function and Parse Flags
@@ -92,12 +106,6 @@ func runScript(name string, devFile config) error {
 	genSharpArgs()
 	var commandStr string
 	var ok bool
-
-	// Check if a envfile is required
-	if devFile.EnvFile != "" {
-		err := godotenv.Load(devFile.EnvFile)
-		check(err, "Failed to load env file")
-	}
 
 	// Check that the arg is actually a script
 	if commandStr, ok = devFile.Scripts[name]; !ok {

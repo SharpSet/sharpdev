@@ -90,7 +90,9 @@ func loadFile(parent *bool) config {
 		return config{}
 	}
 
-	devFile.EnvFile = dir + "/" + devFile.EnvFile
+	if devFile.EnvFile != "" {
+		devFile.EnvFile = dir + "/" + devFile.EnvFile
+	}
 
 	return devFile
 }
