@@ -24,6 +24,8 @@ scripts:
     ./sharpdev --version
     cd ..
 
+  test5: sharpdev build && ./internal/sharpdev
+
   echo1: echo TEST
   echo2: echo $_ARG1 $_ARG2
   echo3: echo $ECHO
@@ -33,3 +35,4 @@ scripts:
     sharpdev test2 Args Works
     sharpdev test3
     sharpdev test4
+    sharpdev test5

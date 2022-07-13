@@ -44,14 +44,11 @@ func main() {
 	// Make Helper Function and Parse Flags
 	setHelperFunction(devFile)
 
-	// If no script is called load helpfunction
-	if flag.Args()[0] == "help" {
-		flag.Usage()
-		return
-	}
-
 	if len(flag.Args()) == 0 {
 		name = "default"
+	} else if flag.Args()[0] == "help" {
+		flag.Usage()
+		return
 	} else {
 		name = flag.Args()[0]
 	}
