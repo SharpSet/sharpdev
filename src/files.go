@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 
 	"gopkg.in/yaml.v2"
 )
@@ -15,6 +16,7 @@ func genFile() {
 	scriptsEx["echo"] = "echo $_ARG1 $_ARG2"
 
 	scriptsEx["say_secret"] = "echo SECRET"
+	scriptsEx["default"] = "echo 'I am the default command'"
 
 	values := make(map[string]string)
 	values["SECRET"] = "Secret123"
@@ -22,6 +24,7 @@ func genFile() {
 	testfile := config{
 		Version: 1.0,
 		Scripts: scriptsEx,
+		Setup:   "echo 'Setup command goes here'",
 		Values:  values,
 		EnvFile: ".env"}
 
@@ -101,7 +104,20 @@ func loadFile(parent *bool) config {
 func saveFile(devFile config) error {
 	yamlData, marshErr := yaml.Marshal(devFile)
 	check(marshErr, "Failed to Convert to Yaml")
-	writeErr := ioutil.WriteFile("./sharpdev.yml", yamlData, 0644)
+
+	// convert yaml to string
+	yamlString := string(yamlData)
+
+	// Add newline before first occurrence of 'scripts:'
+	yamlString = strings.Replace(yamlString, "scripts:", "\nscripts:", 1)
+	yamlString = strings.Replace(yamlString, "values:", "\nvalues:", 1)
+	yamlString = strings.Replace(yamlString, "envfile:", "\nenvfile:", 1)
+	yamlString = strings.Replace(yamlString, "setup:", "\nsetup: |\n ", 1)
+
+	// convert string to bytes
+	yamlBytes := []byte(yamlString)
+
+	writeErr := ioutil.WriteFile("./sharpdev.yml", yamlBytes, 0644)
 
 	if marshErr != nil || writeErr != nil {
 		return errors.New("failed to save file")

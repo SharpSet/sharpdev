@@ -13,6 +13,7 @@ values:
   TEST: Hello World!
 
 scripts:
+  default: echo "Hello World"
   build: go build -o ./internal/sharpdev ./src
   test1: sharpdev build && ./internal/sharpdev echo1
   test2: sharpdev build && ./internal/sharpdev echo2 $_ARG1
@@ -33,7 +34,7 @@ scripts:
 # Installation
 On linux, just run:
 ```console
-sudo curl -s -L https://github.com/SharpSet/sharpdev/releases/download/1.4/install.sh | sudo bash
+sudo curl -s -L https://github.com/SharpSet/sharpdev/releases/download/1.5/install.sh | sudo bash
 ```
 
 ## Command Options
@@ -50,6 +51,8 @@ It Supports:
         - Inputting Args with env vars like $_ARG{1, 2, 3, 4, etc}
 
 Here are all the scripts you have available:
+
+If no script is called, the "default" script will be run.
 
 echo2 || full || build || test1 || test2 || test3 || echo1 ||
 ```

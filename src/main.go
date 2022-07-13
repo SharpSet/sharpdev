@@ -45,12 +45,18 @@ func main() {
 	setHelperFunction(devFile)
 
 	// If no script is called load helpfunction
-	if (len(flag.Args()) == 0) || (flag.Args()[0] == "help") {
+	if flag.Args()[0] == "help" {
 		flag.Usage()
 		return
 	}
+
+	if len(flag.Args()) == 0 {
+		name = "default"
+	} else {
+		name = flag.Args()[0]
+	}
+
 	// Run script with name of first arg
-	name = flag.Args()[0]
 	err := runScript(name, devFile)
 	if err != nil {
 		fmt.Println(err)
@@ -85,12 +91,16 @@ It Supports:
 Flags:
 	-p  Uses a parent sharpdev.yml file
 
+If no script is called, the "default" script will be run.
+
 Here are all the scripts you have available:
 			`)
 
 		// Shows all script name
 		for name := range devFile.Scripts {
-			fmt.Print(name + " || ")
+			if name != "default" {
+				fmt.Print(name + " || ")
+			}
 		}
 		fmt.Println("")
 	}
@@ -110,7 +120,20 @@ func runScript(name string, devFile config) error {
 	// Check that the arg is actually a script
 	if commandStr, ok = devFile.Scripts[name]; !ok {
 		err := errors.New("key not in scripts config")
-		check(err, "ScriptName "+name+" not known")
+
+		if name == "default" {
+			check(err, "There is no default script set")
+		} else {
+			check(err, "ScriptName "+name+" not known")
+		}
+
+	}
+
+	// Run Setup
+	setupCommand := devFile.Setup
+	err = runCommand(setupCommand, devFile)
+	if err != nil {
+		return err
 	}
 
 	// Run command

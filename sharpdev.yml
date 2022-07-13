@@ -3,6 +3,9 @@ envfile: .env
 values:
   TEST: Values work
 
+setup: |
+  echo "Setup"
+
 scripts:
   build: go build -o ./internal/sharpdev ./src
   test1: sharpdev build && ./internal/sharpdev echo1
@@ -30,5 +33,3 @@ scripts:
     sharpdev test2 Args Works
     sharpdev test3
     sharpdev test4
-
-
