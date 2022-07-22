@@ -9,4 +9,4 @@ type config struct {
 }
 
 // Version Number
-var Version float32 = 1.5
+var Version float32 = 1.6

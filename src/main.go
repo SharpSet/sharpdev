@@ -9,7 +9,6 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/a8m/envsubst"
 	"github.com/joho/godotenv"
 )
 
@@ -80,13 +79,15 @@ func setHelperFunction(devFile config) {
 		fmt.Println(`
 This Application lets you run scripts set in your sharpdev.yml file.
 
+Note that if no file is found in the dir you are in, it will instead search in ./env
+
 It Supports:
 	- env vars in the form $VAR or ${VAR}
 	- Multiline commands with |
 	- Inputting Args with env vars like $_ARG{1, 2, 3, 4, etc}
 
 Flags:
-	-p  Uses a parent sharpdev.yml file
+	-p Uses a parent sharpdev.yml file
 
 If no script is called, the "default" script will be run.
 
@@ -109,8 +110,6 @@ func runScript(name string, devFile config) error {
 	err := checkVersion(devFile)
 	check(err, "Incorrect version. \nCurrently running 1.0, Script is running "+fmt.Sprint(devFile.Version))
 
-	// Create Env Vars from other args
-	genSharpArgs()
 	var commandStr string
 	var ok bool
 
@@ -126,13 +125,6 @@ func runScript(name string, devFile config) error {
 
 	}
 
-	// Run Setup
-	setupCommand := devFile.Setup
-	err = runCommand(setupCommand, devFile)
-	if err != nil {
-		return err
-	}
-
 	// Run command
 	err = runCommand(commandStr, devFile)
 	if err != nil {
@@ -143,9 +135,14 @@ func runScript(name string, devFile config) error {
 }
 
 func runCommand(commStr string, devFile config) error {
-	// Substitute Env Vars
-	commStr, err := envsubst.String(commStr)
-	check(err, "Failed to add ENV vars")
+
+	if devFile.Setup != "" {
+		// add setup command to commStr
+		commStr = devFile.Setup + "\n" + commStr
+	}
+
+	// Get Input Args
+	commStr = placeInputArgs(commStr)
 
 	// For command string replace any reference to args
 	for key, val := range devFile.Values {
@@ -157,26 +154,42 @@ func runCommand(commStr string, devFile config) error {
 
 	// Run command through OS args
 	cmd := exec.Command("/bin/sh", "-c", commStr)
+
 	cmd.Env = os.Environ()
 	cmd.Stdin = os.Stdin
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
-	err = cmd.Run()
+	err := cmd.Run()
 
 	return err
 }
 
-func genSharpArgs() {
+func placeInputArgs(commStr string) string {
+
+	if len(flag.Args()) == 0 {
+		return commStr
+	}
+
+	// count the number of _ARG strings
+	count := strings.Count(commStr, "$_ARG") + 1
+
+	// if count is greater than the number of args, exit
+	if len(flag.Args()) < count {
+		log.Fatal("Not enough argument, should be at least " + fmt.Sprint(count-1))
+	} else if len(flag.Args()) > count {
+		log.Fatal("Too many arguments, should be " + fmt.Sprint(count-1))
+	}
 
 	// If there is more than one arg
 	if len(flag.Args()) > 1 {
 		for i := range flag.Args()[1:] {
 
-			// Add arg to Environ
-			sharpArg := fmt.Sprintf("_ARG%d", i+1)
-			os.Setenv(sharpArg, flag.Args()[i+1])
+			// Add arg to CommStr
+			commStr = strings.ReplaceAll(commStr, fmt.Sprintf("$_ARG%d", i+1), flag.Args()[i+1])
 		}
 	}
+
+	return commStr
 }
 
 func checkVersion(devFile config) error {

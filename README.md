@@ -50,7 +50,7 @@ scripts:
 # Installation
 On linux, just run:
 ```console
-sudo curl -s -L https://github.com/SharpSet/sharpdev/releases/download/1.5/install.sh | sudo bash
+sudo curl -s -L https://github.com/SharpSet/sharpdev/releases/download/1.6/install.sh | sudo bash
 ```
 
 ## Command Options

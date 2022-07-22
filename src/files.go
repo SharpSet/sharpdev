@@ -82,10 +82,17 @@ func loadFile(parent *bool) config {
 	f, readErr := ioutil.ReadFile(file)
 
 	if readErr != nil {
-		fmt.Println("No sharpdev.yml was found... generating new one")
-		genFile()
-		return config{}
+
+		file = "./env/sharpdev.yml"
+		f, readErr = ioutil.ReadFile(file)
+
+		if readErr != nil {
+			fmt.Println("No sharpdev.yml was found... generating new one")
+			genFile()
+			return config{}
+		}
 	}
+
 	var devFile config
 	marshErr := yaml.Unmarshal(f, &devFile)
 	if marshErr != nil {
