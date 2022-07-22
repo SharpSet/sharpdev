@@ -11,40 +11,53 @@ version: 1.0
 envfile: .env
 values:
   TEST: Values work
+  _ROOT: /home/coder/code-server/go/src/sharpdev
+  sharpdev_test: /home/coder/code-server/go/src/sharpdev/internal/sharpdev
 
 setup: |
-  echo "Setup"
+  go build -o _ROOT/internal/sharpdev _ROOT/src
+  SETUP="Setup Works"
 
 scripts:
-  build: go build -o ./internal/sharpdev ./src
-  test1: sharpdev build && ./internal/sharpdev echo1
-  test2: sharpdev build && ./internal/sharpdev echo2 $_ARG1 $_ARG2
+  default: echo "Default works"
 
-  test3: |
-    sharpdev build
+  test_echo_single: sharpdev_test echo1
+  test_echo_multi: sharpdev_test echo2 Args Works
+
+  test_parent: |
     cd ./internal
     ./sharpdev -p echo3
     cd ..
 
-  test4: |
-    sharpdev build
+  test_version: |
     cd ./internal
-    ./sharpdev -v
-    ./sharpdev --version
+    echo $(./sharpdev -v) - Version Checks - $(./sharpdev --version)
     cd ..
 
-  test5: sharpdev build && ./internal/sharpdev
+  test_default: sharpdev_test
+
+  test_env_sub: |
+    cd ./tests
+    sharpdev_test sub_file
+    cd ..
+
+  test_setup: |
+    sharpdev_test echo4
 
   echo1: echo TEST
-  echo2: echo $_ARG1 $_ARG2
-  echo3: echo $ECHO
+  echo2: echo "$_ARG1 $_ARG2"
+  echo3: echo "Env and Parent ${ECHO:-failed}"
+  echo4: echo $SETUP
 
   full: |
-    sharpdev test1
-    sharpdev test2 Args Works
-    sharpdev test3
-    sharpdev test4
-    sharpdev test5
+    sharpdev test_echo_single
+    sharpdev test_echo_multi
+    sharpdev test_parent
+    sharpdev test_version
+    sharpdev test_default
+    sharpdev test_env_sub
+    sharpdev test_setup
+
 ```
 
 # Installation
@@ -57,20 +70,25 @@ sudo curl -s -L https://github.com/SharpSet/sharpdev/releases/download/1.6/insta
 
 On linux, just run:
 ```console
-sharpdev --help
+$ sharpdev help
 
 This Application lets you run scripts set in your sharpdev.yml file.
+
+Note that if no file is found in the dir you are in, it will instead search in ./env
 
 It Supports:
         - env vars in the form $VAR or ${VAR}
         - Multiline commands with |
         - Inputting Args with env vars like $_ARG{1, 2, 3, 4, etc}
 
-Here are all the scripts you have available:
+Flags:
+        -p Uses a parent sharpdev.yml file
 
 If no script is called, the "default" script will be run.
 
-echo2 || full || build || test1 || test2 || test3 || echo1 ||
+Here are all the scripts you have available:
+
+test_echo_single || test_version || test_default || test_env_sub || echo1 || echo2 || echo4 || full || test_echo_multi || test_parent || test_setup || echo3 ||
 ```
 
 ## Maintainers
