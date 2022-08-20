@@ -16,6 +16,7 @@ import (
 var parent = flag.Bool("p", false, "Use a parent sharpdev.yml file")
 var version = flag.Bool("v", false, "Get the version number")
 var version2 = flag.Bool("version", false, "Get the version number")
+var skipSetup = flag.Bool("ss", false, "Skips using the setup option")
 
 func main() {
 	var name string
@@ -136,7 +137,7 @@ func runScript(name string, devFile config) error {
 
 func runCommand(commStr string, devFile config) error {
 
-	if devFile.Setup != "" {
+	if devFile.Setup != "" && !*skipSetup {
 		// add setup command to commStr
 		commStr = devFile.Setup + "\n" + commStr
 	}
@@ -170,15 +171,7 @@ func placeInputArgs(commStr string) string {
 		return commStr
 	}
 
-	// count the number of _ARG strings
-	count := strings.Count(commStr, "$_ARG") + 1
-
-	// if count is greater than the number of args, exit
-	if len(flag.Args()) < count {
-		log.Fatal("Not enough argument, should be at least " + fmt.Sprint(count-1))
-	} else if len(flag.Args()) > count {
-		log.Fatal("Too many arguments, should be " + fmt.Sprint(count-1))
-	}
+	var previousCommStr string
 
 	// If there is more than one arg
 	if len(flag.Args()) > 1 {
@@ -186,6 +179,16 @@ func placeInputArgs(commStr string) string {
 
 			// Add arg to CommStr
 			commStr = strings.ReplaceAll(commStr, fmt.Sprintf("$_ARG%d", i+1), flag.Args()[i+1])
+
+			// check if commStr changed from previous iteration
+			if commStr == previousCommStr {
+				// convert all args to string with spaces
+				args := strings.Join(flag.Args()[i+1:], " ")
+				fmt.Println("Extra args were provided - appending to the end (" + args + ")")
+				return commStr + " " + args
+			}
+
+			previousCommStr = commStr
 		}
 	}
 
