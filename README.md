@@ -51,20 +51,27 @@ scripts:
       echo "Setup Failed. Great!\n"
     fi
 
+  test_echo_complicated: |
+    sharpdev_test echo5 yay! Duplicates_Work!
+    sharpdev_test echo2 Extra Args Works!
+
   echo1: echo TEST
   echo2: echo "$_ARG1 $_ARG2"
   echo3: echo "Env and Parent ${ECHO:-failed}"
   echo4: echo $SETUP
+  echo5: echo "$_ARG1 $_ARG2 $_ARG1"
 
   full: |
     sharpdev test_echo_single
     sharpdev test_echo_multi
+    sharpdev test_echo_complicated
     sharpdev test_parent
     sharpdev test_version
     sharpdev test_default
     sharpdev test_env_sub
     sharpdev test_setup
     sharpdev_test -ss test_skip_setup
+
 ```
 
 # Installation
