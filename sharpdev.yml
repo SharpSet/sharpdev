@@ -2,8 +2,8 @@ version: 1.0
 envfile: .env
 values:
   TEST: Values work
-  _ROOT: /home/coder/code-server/go/src/sharpdev
-  sharpdev_test: /home/coder/code-server/go/src/sharpdev/internal/sharpdev
+  _ROOT: /home/coder/projects/sharpdev
+  sharpdev_test: /home/coder/projects/sharpdev/internal/sharpdev
 
 setup: |
   go build -o _ROOT/internal/sharpdev _ROOT/src
@@ -46,6 +46,15 @@ scripts:
     sharpdev_test echo5 yay! Duplicates_Work!
     sharpdev_test echo2 Extra Args Works!
 
+  test_env_download: |
+    sharpdev_test --url=https://github.com/Sharpz7/dotfiles --envname=k8s
+
+    if [ -f ./env/sharpdev.yml ]; then
+      echo "File Exists"
+    else
+      echo "File Does Not Exist"
+    fi
+
   echo1: echo TEST
   echo2: echo "$_ARG1 $_ARG2"
   echo3: echo "Env and Parent ${ECHO:-failed}"
@@ -62,3 +71,4 @@ scripts:
     sharpdev test_env_sub
     sharpdev test_setup
     sharpdev_test -ss test_skip_setup
+    sharpdev_test test_env_download

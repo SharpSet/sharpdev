@@ -26,7 +26,8 @@ func genFile() {
 		Scripts: scriptsEx,
 		Setup:   "echo 'Setup command goes here'",
 		Values:  values,
-		EnvFile: ".env"}
+		EnvFile: ".env",
+	}
 
 	err := saveFile(testfile)
 	check(err, "Failed to generate sharpdev.yml")
@@ -43,7 +44,7 @@ func loadFile(parent *bool) config {
 	var err error
 	var dir string = "./"
 
-	if *parent == true {
+	if *parent {
 		// find the parent directory
 		dir, err = os.Getwd()
 		check(err, "Failed to get current directory")
@@ -124,7 +125,7 @@ func saveFile(devFile config) error {
 	// convert string to bytes
 	yamlBytes := []byte(yamlString)
 
-	writeErr := ioutil.WriteFile("./sharpdev.yml", yamlBytes, 0644)
+	writeErr := ioutil.WriteFile("./sharpdev.yml", yamlBytes, 0o644)
 
 	if marshErr != nil || writeErr != nil {
 		return errors.New("failed to save file")

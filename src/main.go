@@ -13,10 +13,14 @@ import (
 )
 
 // add a -p flag var as bool
-var parent = flag.Bool("p", false, "Use a parent sharpdev.yml file")
-var version = flag.Bool("v", false, "Get the version number")
-var version2 = flag.Bool("version", false, "Get the version number")
-var skipSetup = flag.Bool("ss", false, "Skips using the setup option")
+var (
+	parent    = flag.Bool("p", false, "Use a parent sharpdev.yml file")
+	version   = flag.Bool("v", false, "Get the version number")
+	version2  = flag.Bool("version", false, "Get the version number")
+	skipSetup = flag.Bool("ss", false, "Skips using the setup option")
+	dotFile   = flag.String("url", "", "The dotfile repo for the sharpdev files. See https://github.com/Sharpz7/dotfiles")
+	envName   = flag.String("envname", "", "The name of sharpdev env to download from")
+)
 
 func main() {
 	var name string
@@ -26,6 +30,15 @@ func main() {
 	// If -v is used, print version
 	if *version || *version2 {
 		fmt.Println(Version)
+		os.Exit(0)
+	}
+
+	// if dotfile is set
+	if *dotFile != "" {
+		// Place dotFile/env/envName/sharpdev.yml in ./env
+		err := downloadDotFile(*dotFile, *envName)
+
+		check(err, "Failed to download dotfile")
 		os.Exit(0)
 	}
 
@@ -58,8 +71,6 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
-
-	return
 }
 
 // Deals with client Errors
@@ -71,7 +82,7 @@ func check(e error, msg string) {
 		if os.Getenv("DEV") == "TRUE" {
 			fmt.Println(e)
 		}
-		log.Fatal(msg)
+		log.Fatal(msg + "\n" + e.Error())
 	}
 }
 
@@ -106,7 +117,6 @@ Here are all the scripts you have available:
 }
 
 func runScript(name string, devFile config) error {
-
 	// Check if version is correct
 	err := checkVersion(devFile)
 	check(err, "Incorrect version. \nCurrently running 1.0, Script is running "+fmt.Sprint(devFile.Version))
@@ -136,7 +146,6 @@ func runScript(name string, devFile config) error {
 }
 
 func runCommand(commStr string, devFile config) error {
-
 	if devFile.Setup != "" && !*skipSetup {
 		// add setup command to commStr
 		commStr = devFile.Setup + "\n" + commStr
@@ -149,9 +158,6 @@ func runCommand(commStr string, devFile config) error {
 	for key, val := range devFile.Values {
 		commStr = strings.ReplaceAll(commStr, key, val)
 	}
-
-	// Replace "\n" with &&
-	strings.Replace(commStr, "\n", "&&", -1)
 
 	// Run command through OS args
 	cmd := exec.Command("/bin/sh", "-c", commStr)
@@ -166,7 +172,6 @@ func runCommand(commStr string, devFile config) error {
 }
 
 func placeInputArgs(commStr string) string {
-
 	if len(flag.Args()) == 0 {
 		return commStr
 	}
@@ -196,7 +201,6 @@ func placeInputArgs(commStr string) string {
 }
 
 func checkVersion(devFile config) error {
-
 	if devFile.Version != 1.0 {
 		return errors.New("")
 	}
